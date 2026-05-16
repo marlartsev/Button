@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>touch</title>
+<style>
+  :root{
+    --bg1:#3a2a24;
+    --bg2:#6b4b42;
+    --bg3:#d8b7a8;
+    --btn1:#e8c9bb;
+    --btn2:#b98578;
+    --btn3:#fff1e8;
+    --glow:rgba(255,210,185,.22);
+    --grain-opacity:.13;
+    --warm:0deg;
+    --breath:1;
+  }
+
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#2b211e;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Inter",sans-serif}
+  body{
+    touch-action:manipulation;
+    user-select:none;
+  }
+
+  .world{
+    position:fixed;
+    inset:0;
+    display:grid;
+    place-items:center;
+    background:
+      radial-gradient(circle at 48% 45%, rgba(255,214,194,.46), transparent 21%),
+      radial-gradient(circle at 50% 58%, rgba(156,91,79,.44), transparent 43%),
+      radial-gradient(circle at 20% 10%, rgba(255,230,210,.08), transparent 31%),
+      linear-gradient(155deg, var(--bg1), var(--bg2) 55%, #2b211e);
+    filter:hue-rotate(var(--warm)) saturate(1.04);
+    transition:
+      background 2200ms ease,
+      filter 1800ms ease,
+      transform 900ms ease;
+  }
+
+  .world::before{
+    content:"";
+    position:absolute;
+    inset:-16%;
+    background:
+      radial-gradient(ellipse at 48% 52%, rgba(255,235,220,.18), transparent 31%),
+      radial-gradient(ellipse at 54% 48%, rgba(74,38,35,.32), transparent 49%);
+    filter:blur(38px);
+    animation:breathe 8.5s ease-in-out infinite;
+    opacity:.9;
+  }
+
+  .world::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    opacity:var(--grain-opacity);
+    mix-blend-mode:soft-light;
+    background-image:
+      repeating-radial-gradient(circle at 17% 23%, rgba(255,255,255,.55) 0 1px, transparent 1px 3px),
+      repeating-linear-gradient(87deg, rgba(0,0,0,.2) 0 1px, transparent 1px 5px);
+    filter:blur(.35px);
+  }
+
+  .skin-field{
+    position:relative;
+    width:min(72vw, 360px);
+    aspect-ratio: .72 / 1;
+    border-radius:34px;
+    display:grid;
+    place-items:center;
+    background:
+      radial-gradient(circle at 50% 40%, rgba(255,245,236,.76), transparent 34%),
+      radial-gradient(circle at 51% 54%, rgba(224,170,150,.42), transparent 52%),
+      linear-gradient(160deg, #f2d7ca, #b9897d 62%, #6e4a42);
+    box-shadow:
+      inset 0 0 22px rgba(255,255,255,.16),
+      inset 0 -32px 70px rgba(78,39,34,.42),
+      inset 0 34px 80px rgba(255,234,220,.22),
+      0 0 42px var(--glow),
+      0 32px 90px rgba(0,0,0,.5);
+    overflow:hidden;
+    transform:scale(var(--breath));
+    transition:
+      filter 1200ms ease,
+      transform 760ms cubic-bezier(.2,.9,.1,1.15),
+      box-shadow 1200ms ease,
+      background 1500ms ease;
+  }
+
+  .skin-field::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+      radial-gradient(circle at 44% 45%, rgba(255,255,255,.24), transparent 22%),
+      radial-gradient(circle at 63% 70%, rgba(103,42,37,.18), transparent 38%),
+      repeating-radial-gradient(circle at 55% 50%, rgba(255,255,255,.07) 0 1px, transparent 1px 11px);
+    filter:blur(1px);
+    opacity:.78;
+    animation:skinDrift 18s ease-in-out infinite alternate;
+  }
+
+  button{
+    position:relative;
+    width:min(38vw, 168px);
+    height:min(15vw, 66px);
+    min-height:48px;
+    border:0;
+    border-radius:999px;
+    cursor:pointer;
+    background:
+      radial-gradient(circle at 45% 30%, rgba(255,255,255,.58), transparent 27%),
+      linear-gradient(180deg, var(--btn3), var(--btn1) 43%, var(--btn2));
+    box-shadow:
+      inset 0 3px 10px rgba(255,255,255,.45),
+      inset 0 -8px 18px rgba(112,54,48,.24),
+      0 7px 17px rgba(72,32,28,.35),
+      0 0 34px rgba(255,211,190,.18);
+    outline:none;
+    transition:
+      transform 180ms cubic-bezier(.2,.9,.1,1.3),
+      filter 800ms ease,
+      box-shadow 1000ms ease,
+      background 1200ms ease;
+  }
+
+  button::after{
+    content:"";
+    position:absolute;
+    inset:14%;
+    border-radius:999px;
+    background:linear-gradient(90deg, rgba(255,255,255,.38), transparent 60%);
+    filter:blur(5px);
+    opacity:.75;
+  }
+
+  button:active{
+    transform:scale(.93) translateY(2px);
+    box-shadow:
+      inset 0 2px 8px rgba(112,54,48,.35),
+      inset 0 -3px 12px rgba(255,255,255,.22),
+      0 3px 9px rgba(0,0,0,.28);
+  }
+
+  .pulse-edge{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    box-shadow:inset 0 0 0 0 rgba(255,220,205,0);
+  }
+
+  .edge-on{
+    animation:edgePulse 1600ms ease-out forwards;
+  }
+
+  .wet button{filter:saturate(1.12) brightness(1.04); box-shadow:
+      inset 0 5px 14px rgba(255,255,255,.6),
+      inset 0 -9px 18px rgba(112,54,48,.2),
+      0 6px 18px rgba(72,32,28,.34),
+      0 0 52px rgba(255,222,203,.34);}
+  .soften .skin-field{filter:blur(.25px) brightness(1.04)}
+  .warmer{--warm:7deg}
+  .cooler{--warm:-5deg}
+  .button-warm button{background:radial-gradient(circle at 45% 30%, rgba(255,255,255,.55), transparent 27%),linear-gradient(180deg,#ffe4d7,#efbcae 45%,#bc7d72)}
+  .glow .skin-field{box-shadow:inset 0 0 22px rgba(255,255,255,.16),inset 0 -32px 70px rgba(78,39,34,.42),inset 0 34px 80px rgba(255,234,220,.22),0 0 78px rgba(255,214,190,.42),0 32px 90px rgba(0,0,0,.5)}
+  .sink button{transform:scale(.95) translateY(4px)}
+  .breathe-on{--breath:1.018}
+
+  @keyframes breathe{
+    0%,100%{transform:scale(1);opacity:.76}
+    50%{transform:scale(1.04);opacity:1}
+  }
+  @keyframes skinDrift{
+    from{transform:translate(-2%, -1%) scale(1.02)}
+    to{transform:translate(2%, 2%) scale(1.05)}
+  }
+  @keyframes edgePulse{
+    0%{box-shadow:inset 0 0 0 0 rgba(255,220,205,.0)}
+    28%{box-shadow:inset 0 0 80px 6px rgba(255,220,205,.16)}
+    100%{box-shadow:inset 0 0 0 0 rgba(255,220,205,0)}
+  }
+
+  @media (min-width:700px){
+    .skin-field{width:330px}
+    button{width:150px;height:58px}
+  }
+</style>
+</head>
+<body>
+  <main class="world" aria-label="soft interface">
+    <section class="skin-field">
+      <button id="touch" aria-label="touch"></button>
+    </section>
+  </main>
+  <div id="edge" class="pulse-edge"></div>
+
+<script>
+(() => {
+  const root = document.documentElement;
+  const body = document.body;
+  const btn = document.getElementById('touch');
+  const edge = document.getElementById('edge');
+
+  let audioCtx = null;
+
+  function ctx(){
+    if(!audioCtx){
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if(audioCtx.state === "suspended") audioCtx.resume();
+    return audioCtx;
+  }
+
+  function clickSound(){
+    const ac = ctx();
+    const now = ac.currentTime;
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+    const filter = ac.createBiquadFilter();
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(82, now);
+    osc.frequency.exponentialRampToValueAtTime(43, now + 0.08);
+
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(240, now);
+
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.18, now + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(ac.destination);
+    osc.start(now);
+    osc.stop(now + 0.2);
+  }
+
+  function hum(duration = 1.8, freq = 55, volume = 0.035){
+    const ac = ctx();
+    const now = ac.currentTime;
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+    const filter = ac.createBiquadFilter();
+
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(freq, now);
+    osc.frequency.linearRampToValueAtTime(freq * 0.94, now + duration);
+
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(170, now);
+
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(volume, now + 0.18);
+    gain.gain.setValueAtTime(volume, now + duration - 0.3);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(ac.destination);
+    osc.start(now);
+    osc.stop(now + duration + 0.02);
+  }
+
+  function distantTone(){
+    const ac = ctx();
+    const now = ac.currentTime;
+    [330, 416].forEach((f, i) => {
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.type = "sine";
+      o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, now + i * 0.035);
+      g.gain.exponentialRampToValueAtTime(0.025, now + 0.06 + i * 0.035);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.55 + i * 0.035);
+      o.connect(g);
+      g.connect(ac.destination);
+      o.start(now + i * 0.035);
+      o.stop(now + 0.58 + i * 0.035);
+    });
+  }
+
+  function vibrate(pattern){
+    if(navigator.vibrate) navigator.vibrate(pattern);
+  }
+
+  function temporaryClass(cls, ms=1400){
+    body.classList.add(cls);
+    window.setTimeout(() => body.classList.remove(cls), ms);
+  }
+
+  function edgePulse(){
+    edge.classList.remove('edge-on');
+    void edge.offsetWidth;
+    edge.classList.add('edge-on');
+  }
+
+  function shiftTone(){
+    const bgA = ["#3a2a24","#412b26","#352723","#4a302b"];
+    const bgB = ["#6b4b42","#7b554b","#5e4640","#744e45"];
+    const bgC = ["#d8b7a8","#e0b9aa","#cdaea1","#e6c3b4"];
+    const i = Math.floor(Math.random()*bgA.length);
+    root.style.setProperty("--bg1", bgA[i]);
+    root.style.setProperty("--bg2", bgB[i]);
+    root.style.setProperty("--bg3", bgC[i]);
+    setTimeout(() => {
+      root.style.setProperty("--bg1", "#3a2a24");
+      root.style.setProperty("--bg2", "#6b4b42");
+      root.style.setProperty("--bg3", "#d8b7a8");
+    }, 2600);
+  }
+
+  const effects = [
+    () => {},                                      // nothing
+    () => { clickSound(); },                       // deep click only
+    () => { shiftTone(); },                        // background shift
+    () => { temporaryClass("button-warm", 1700); },
+    () => { temporaryClass("glow", 1200); clickSound(); },
+    () => { hum(2.2, 48, 0.028); },
+    () => { vibrate(24); clickSound(); },
+    () => { vibrate([38, 45, 70]); },
+    () => { temporaryClass("breathe-on", 1100); },
+    () => { edgePulse(); },
+    () => { temporaryClass("wet", 1400); },
+    () => { temporaryClass("sink", 900); clickSound(); },
+    () => { setTimeout(() => temporaryClass("glow", 900), 900 + Math.random()*1800); },
+    () => { setTimeout(() => hum(1.4, 62, 0.018), 1300 + Math.random()*2400); },
+    () => { temporaryClass("soften", 1500); },
+    () => { distantTone(); },
+    () => { temporaryClass(Math.random() > .5 ? "warmer" : "cooler", 2000); },
+    () => { vibrate([15, 70, 15, 130, 45]); hum(1.1, 42, 0.018); },
+    () => { /* ignored */ },
+    () => { setTimeout(() => vibrate(35), 2200 + Math.random()*1800); }
+  ];
+
+  btn.addEventListener("pointerdown", () => {
+    const delay = Math.random() < .22 ? 400 + Math.random()*1800 : 0;
+    const effect = effects[Math.floor(Math.random() * effects.length)];
+    if(delay) setTimeout(effect, delay);
+    else effect();
+  }, {passive:true});
+
+  // subtle autonomous waiting: rare tiny pulse
+  setInterval(() => {
+    if(Math.random() < .38) temporaryClass("breathe-on", 900);
+  }, 9000);
+})();
+</script>
+</body>
+</html>
