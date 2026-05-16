@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+<title>touch</title>
+
+<style>
+:root{
+    --vh:1vh;
+    --warm:0deg;
+    --sat:1;
+    --dim:1;
+}
+
+html,body{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:calc(var(--vh) * 100);
+    overflow:hidden;
+    position:fixed;
+    inset:0;
+    background:#d7a79a;
+}
+
+*{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+    user-select:none;
+}
+
+body{
+    touch-action:manipulation;
+    overscroll-behavior:none;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:
+        radial-gradient(circle at 50% 38%, rgba(255,236,228,.46), transparent 21%),
+        radial-gradient(circle at 48% 54%, rgba(224,145,130,.32), transparent 45%),
+        radial-gradient(circle at 52% 100%, rgba(87,38,35,.42), transparent 58%),
+        linear-gradient(180deg,#efc9bd 0%, #d69e91 58%, #875249 100%);
+
+    filter:hue-rotate(var(--warm)) saturate(var(--sat)) brightness(var(--dim));
+
+    transition:
+        background 1.8s ease,
+        filter 1.6s ease;
+}
+
+body::before{
+    content:"";
+    position:fixed;
+    inset:-18%;
+    pointer-events:none;
+    background:
+        radial-gradient(circle at 45% 45%, rgba(255,239,230,.17), transparent 32%),
+        radial-gradient(circle at 55% 78%, rgba(80,30,28,.18), transparent 46%);
+    filter:blur(85px);
+    animation:slowBreath 10s ease-in-out infinite;
+}
+
+body::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    opacity:.08;
+    mix-blend-mode:soft-light;
+    background:
+        repeating-radial-gradient(circle at 50% 50%, rgba(255,255,255,.38) 0 1px, transparent 1px 6px);
+}
+
+button{
+    position:relative;
+    z-index:3;
+
+    width:min(34vw,170px);
+    aspect-ratio:1/1;
+
+    border:0;
+    outline:0;
+    border-radius:999px;
+    cursor:pointer;
+    touch-action:manipulation;
+
+    background:
+        radial-gradient(circle at 50% 42%, rgba(255,218,222,.12), transparent 30%),
+        radial-gradient(circle at 50% 50%, #bd737a 0%, #a45b63 62%, #813f49 100%);
+
+    box-shadow:
+        inset 0 4px 7px rgba(255,225,225,.06),
+        inset 0 -8px 14px rgba(48,13,16,.20),
+        0 9px 22px rgba(76,22,27,.14);
+
+    transform:translateY(0) scale(1);
+
+    transition:
+        transform 1.25s cubic-bezier(.16,.84,.2,1),
+        background 1.4s ease,
+        filter 1.2s ease,
+        box-shadow 1.4s ease;
+}
+
+button::before{
+    content:"";
+    position:absolute;
+    inset:17%;
+    border-radius:inherit;
+    background:
+        radial-gradient(circle at 50% 40%, rgba(255,220,225,.10), transparent 48%);
+    filter:blur(12px);
+    pointer-events:none;
+}
+
+button.pressing{
+    transform:translateY(7px) scale(.91);
+    filter:brightness(.94) saturate(1.08);
+    box-shadow:
+        inset 0 10px 22px rgba(55,12,16,.25),
+        inset 0 -3px 7px rgba(255,210,215,.04),
+        0 3px 12px rgba(76,22,27,.11);
+}
+
+button.hot{
+    background:
+        radial-gradient(circle at 50% 42%, rgba(255,226,229,.14), transparent 30%),
+        radial-gradient(circle at 50% 50%, #d2848d 0%, #b76672 62%, #954c59 100%);
+}
+
+button.tired{
+    background:
+        radial-gradient(circle at 50% 42%, rgba(220,180,185,.08), transparent 30%),
+        radial-gradient(circle at 50% 50%, #9d5961 0%, #7c3e48 62%, #5c2932 100%);
+    filter:brightness(.84) saturate(.88);
+}
+
+body.rose{
+    background:
+        radial-gradient(circle at 50% 38%, rgba(255,232,232,.50), transparent 21%),
+        radial-gradient(circle at 48% 54%, rgba(234,132,154,.42), transparent 46%),
+        radial-gradient(circle at 52% 100%, rgba(91,38,46,.46), transparent 58%),
+        linear-gradient(180deg,#f5c7cf 0%, #d9899d 58%, #8d4a58 100%);
+}
+
+body.peach{
+    background:
+        radial-gradient(circle at 50% 38%, rgba(255,238,226,.52), transparent 21%),
+        radial-gradient(circle at 48% 54%, rgba(229,135,105,.40), transparent 46%),
+        radial-gradient(circle at 52% 100%, rgba(91,43,35,.46), transparent 58%),
+        linear-gradient(180deg,#f2c8b7 0%, #dc937c 58%, #875044 100%);
+}
+
+body.brown{
+    background:
+        radial-gradient(circle at 50% 38%, rgba(255,230,220,.34), transparent 21%),
+        radial-gradient(circle at 48% 54%, rgba(178,103,92,.36), transparent 46%),
+        radial-gradient(circle at 52% 100%, rgba(68,30,27,.50), transparent 58%),
+        linear-gradient(180deg,#e0b1a2 0%, #b9766b 58%, #673934 100%);
+}
+
+body.pale{
+    background:
+        radial-gradient(circle at 50% 38%, rgba(255,244,237,.55), transparent 21%),
+        radial-gradient(circle at 48% 54%, rgba(211,155,145,.30), transparent 46%),
+        radial-gradient(circle at 52% 100%, rgba(94,50,45,.34), transparent 58%),
+        linear-gradient(180deg,#f0d2c8 0%, #d8aaa0 58%, #93645c 100%);
+}
+
+body.flush{
+    filter:hue-rotate(-8deg) saturate(1.16) brightness(1.06);
+}
+
+body.dull{
+    filter:saturate(.78) brightness(.88);
+}
+
+body.microshake{
+    transform:translateX(.7px);
+}
+
+@keyframes slowBreath{
+    0%,100%{transform:scale(1);opacity:.72}
+    50%{transform:scale(1.05);opacity:1}
+}
+</style>
+</head>
+
+<body>
+
+<button id="b" aria-label="touch"></button>
+
+<script>
+function setVH(){
+    document.documentElement.style.setProperty("--vh", `${window.innerHeight * 0.01}px`);
+}
+setVH();
+window.addEventListener("resize", setVH);
+window.addEventListener("orientationchange", () => setTimeout(setVH, 300));
+
+const b = document.getElementById("b");
+
+let locked = false;
+let audioCtx;
+let fatigue = 0;
+let lastPress = 0;
+
+function ctx(){
+    if(!audioCtx){
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if(audioCtx.state === "suspended"){
+        audioCtx.resume();
+    }
+    return audioCtx;
+}
+
+function tone(freq=48,dur=.75,vol=.22,type="sine"){
+    const ac = ctx();
+    const now = ac.currentTime;
+
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+    const filter = ac.createBiquadFilter();
+
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, now);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(22, freq*.55), now + dur*.78);
+
+    filter.type = "lowpass";
+    filter.frequency.value = 130;
+
+    gain.gain.setValueAtTime(.0001, now);
+    gain.gain.exponentialRampToValueAtTime(vol, now + .055);
+    gain.gain.exponentialRampToValueAtTime(.0001, now + dur);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(ac.destination);
+
+    osc.start(now);
+    osc.stop(now + dur + .03);
+}
+
+function hum(freq=36,dur=2.5,vol=.035){
+    const ac = ctx();
+    const now = ac.currentTime;
+
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(freq, now);
+
+    gain.gain.setValueAtTime(.0001, now);
+    gain.gain.exponentialRampToValueAtTime(vol, now + .25);
+    gain.gain.exponentialRampToValueAtTime(.0001, now + dur);
+
+    osc.connect(gain);
+    gain.connect(ac.destination);
+
+    osc.start(now);
+    osc.stop(now + dur + .03);
+}
+
+function breathSound(){
+    const ac = ctx();
+    const now = ac.currentTime;
+
+    const bufferSize = ac.sampleRate * 1.2;
+    const buffer = ac.createBuffer(1, bufferSize, ac.sampleRate);
+    const data = buffer.getChannelData(0);
+
+    for(let i=0;i<bufferSize;i++){
+        data[i] = (Math.random()*2-1) * .12;
+    }
+
+    const noise = ac.createBufferSource();
+    noise.buffer = buffer;
+
+    const filter = ac.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = 95;
+
+    const gain = ac.createGain();
+    gain.gain.setValueAtTime(.0001, now);
+    gain.gain.exponentialRampToValueAtTime(.035, now + .3);
+    gain.gain.exponentialRampToValueAtTime(.0001, now + 1.2);
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(ac.destination);
+
+    noise.start(now);
+    noise.stop(now + 1.2);
+}
+
+function vibrate(pattern){
+    try{
+        if(navigator.vibrate){
+            navigator.vibrate(pattern);
+        }
+    }catch(e){}
+
+    // iPhone fallback — visible tactile tremor
+    document.body.classList.add("microshake");
+    setTimeout(()=>document.body.classList.remove("microshake"),60);
+}
+
+function cls(el,name,ms){
+    el.classList.add(name);
+    setTimeout(()=>el.classList.remove(name),ms);
+}
+
+function clearColor(){
+    document.body.classList.remove("rose","peach","brown","pale","flush","dull");
+}
+
+function color(name,ms=2400){
+    clearColor();
+    document.body.classList.add(name);
+    setTimeout(()=>{
+        document.body.classList.remove(name);
+    },ms);
+}
+
+function fatigueUpdate(){
+    fatigue++;
+
+    if(fatigue >= 4){
+        b.classList.add("tired");
+        cls(document.body,"dull",1800);
+    }
+
+    clearTimeout(window.fatigueTimer);
+    window.fatigueTimer = setTimeout(()=>{
+        fatigue = Math.max(0, fatigue - 1);
+        if(fatigue < 4){
+            b.classList.remove("tired");
+        }
+    },3600);
+}
+
+function delayed(fn,min=1000,max=4200){
+    setTimeout(fn, min + Math.random()*(max-min));
+}
+
+const subtleEffects = [
+    () => {},
+
+    () => color("rose",2600),
+
+    () => color("peach",2400),
+
+    () => color("brown",2500),
+
+    () => color("pale",2200),
+
+    () => cls(document.body,"flush",2200),
+
+    () => {
+        cls(b,"hot",1900);
+    },
+
+    () => hum(35,2.6,.032),
+
+    () => hum(43,1.8,.026),
+
+    () => {
+        tone(42,.9,.14,"sine");
+        delayed(()=>hum(31,1.4,.020),400,900);
+    },
+
+    () => breathSound(),
+
+    () => vibrate(55),
+
+    () => vibrate([70,90,110]),
+
+    () => vibrate([35,60,35,120,70]),
+
+    () => delayed(()=>hum(36,3.5,.025),1200,3200),
+
+    () => delayed(()=>color("rose",2300),1400,3800),
+
+    () => delayed(()=>breathSound(),1600,4200),
+
+    () => {
+        delayed(()=>vibrate([50,100,90]),900,2600);
+    }
+];
+
+function pickEffect(){
+    const r = Math.random();
+
+    // fatigue: more silence, lower response
+    if(fatigue >= 5 && r < .42) return () => {};
+    if(r < .28) return () => {};
+    if(r < .58) return subtleEffects[1 + Math.floor(Math.random()*6)];
+    if(r < .78) return subtleEffects[7 + Math.floor(Math.random()*4)];
+    if(r < .90) return subtleEffects[11 + Math.floor(Math.random()*3)];
+    return subtleEffects[14 + Math.floor(Math.random()*4)];
+}
+
+function activate(e){
+    if(e){
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    const now = Date.now();
+
+    if(locked || now - lastPress < 450) return;
+
+    lastPress = now;
+    locked = true;
+
+    fatigueUpdate();
+
+    b.classList.add("pressing");
+
+    // primary response is always tactile enough to prove touch worked
+    const baseFreq = fatigue >= 4 ? 40 : 50;
+    const baseVol = fatigue >= 4 ? .14 : .22;
+
+    tone(baseFreq,.78,baseVol,"sine");
+
+    // real vibration where supported + fallback
+    vibrate(fatigue >= 4 ? 25 : 35);
+
+    const effect = pickEffect();
+
+    setTimeout(effect, 420 + Math.random()*900);
+
+    setTimeout(()=>{
+        b.classList.remove("pressing");
+    }, fatigue >= 4 ? 1500 : 1200);
+
+    setTimeout(()=>{
+        locked = false;
+    }, fatigue >= 4 ? 2300 : 1700);
+}
+
+b.addEventListener("pointerdown", activate, {passive:false});
+b.addEventListener("touchstart", activate, {passive:false});
+b.addEventListener("mousedown", activate, {passive:false});
+</script>
+
+</body>
+</html>
