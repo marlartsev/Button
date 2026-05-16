@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>touch</title>
+<style>
+:root{
+  --vh:1vh;
+  --bg-a:#efc9bd;
+  --bg-b:#d59f92;
+  --bg-c:#8a564d;
+  --glow:rgba(255,226,216,.42);
+}
+html,body{
+  margin:0;
+  padding:0;
+  width:100%;
+  height:calc(var(--vh) * 100);
+  min-height:100vh;
+  overflow:hidden;
+  position:fixed;
+  inset:0;
+  background:linear-gradient(180deg,var(--bg-a) 0%,var(--bg-b) 58%,var(--bg-c) 100%);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+body{touch-action:manipulation;overscroll-behavior:none}
+.world{
+  position:fixed;
+  left:-4px;
+  right:-4px;
+  top:-4px;
+  bottom:-36px;
+  min-height:calc(var(--vh) * 100 + 80px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255,239,232,.46), transparent 24%),
+    radial-gradient(circle at 50% 57%, rgba(220,148,132,.38), transparent 50%),
+    radial-gradient(circle at 50% 104%, rgba(90,42,38,.44), transparent 58%),
+    linear-gradient(180deg,var(--bg-a) 0%,var(--bg-b) 58%,var(--bg-c) 100%);
+  transition:background 1.7s ease, filter 1.4s ease, transform 70ms ease;
+}
+.world::after{
+  content:"";
+  position:absolute;
+  inset:-18%;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 50% 46%, rgba(255,240,232,.18), transparent 34%),
+    radial-gradient(circle at 55% 82%, rgba(70,26,24,.19), transparent 48%);
+  filter:blur(92px);
+  animation:breathe 11s ease-in-out infinite;
+}
+.button{
+  position:relative;
+  z-index:10;
+  width:min(34vw,170px);
+  aspect-ratio:1/1;
+  border:0;
+  outline:0;
+  border-radius:999px;
+  cursor:pointer;
+  touch-action:manipulation;
+  background:
+    radial-gradient(circle at 50% 39%, rgba(255,220,220,.18), transparent 25%),
+    radial-gradient(circle at 50% 50%, #b76b75 0%, #9e5660 60%, #7d3e48 100%);
+  box-shadow:
+    inset 0 5px 8px rgba(255,220,220,.08),
+    inset 0 -8px 16px rgba(45,10,13,.22),
+    0 10px 26px rgba(85,26,30,.18);
+  transition:transform 1.15s cubic-bezier(.16,.84,.2,1), filter 1.2s ease, background 1.4s ease, box-shadow 1.4s ease;
+}
+.button::after{
+  content:"";
+  position:absolute;
+  inset:23%;
+  border-radius:inherit;
+  pointer-events:none;
+  background:radial-gradient(circle at 50% 38%, rgba(255,226,225,.15), transparent 48%);
+  filter:blur(9px);
+}
+.button.pressing{
+  transform:scale(.90);
+  filter:brightness(.96) saturate(1.08);
+  box-shadow:
+    inset 0 8px 17px rgba(55,12,15,.24),
+    inset 0 -4px 10px rgba(255,210,210,.05),
+    0 5px 18px rgba(78,24,28,.12);
+}
+.button.hot{
+  background:
+    radial-gradient(circle at 50% 39%, rgba(255,225,225,.22), transparent 25%),
+    radial-gradient(circle at 50% 50%, #cf7f8a 0%, #b96772 60%, #964b58 100%);
+}
+.button.dark{
+  background:
+    radial-gradient(circle at 50% 39%, rgba(255,214,214,.12), transparent 25%),
+    radial-gradient(circle at 50% 50%, #9b505c 0%, #743640 60%, #55272f 100%);
+}
+.world.rose{
+  --bg-a:#f3c5cc; --bg-b:#d8899b; --bg-c:#8d4b59;
+}
+.world.peach{
+  --bg-a:#f2c8b7; --bg-b:#d8947e; --bg-c:#855044;
+}
+.world.brown{
+  --bg-a:#e7b8a8; --bg-b:#bc7e72; --bg-c:#6d3e39;
+}
+.world.pale{
+  --bg-a:#f1d3c9; --bg-b:#d8aaa0; --bg-c:#93645c;
+}
+.world.pulse{animation:pulse 2.3s ease}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
+@keyframes pulse{0%,100%{filter:brightness(1) saturate(1)}50%{filter:brightness(1.13) saturate(1.12)}}
+</style>
+</head>
+<body>
+<div class="world" id="world"><button class="button" id="button" aria-label="touch"></button></div>
+<script>
+function setVH(){
+  document.documentElement.style.setProperty("--vh", `${window.innerHeight * 0.01}px`);
+}
+setVH();
+window.addEventListener("resize", setVH);
+window.addEventListener("orientationchange", () => setTimeout(setVH, 300));
+
+const world=document.getElementById("world");
+const button=document.getElementById("button");
+let locked=false, audioCtx=null, lastFire=0;
+
+function ctx(){
+  if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==="suspended") audioCtx.resume();
+  return audioCtx;
+}
+function vibrate(pattern){
+  try{ if(navigator.vibrate) navigator.vibrate(pattern); }catch(e){}
+  world.style.transform="translateX(.7px)";
+  setTimeout(()=>world.style.transform="translateX(-.5px)",32);
+  setTimeout(()=>world.style.transform="",70);
+}
+function tone(freq=46,dur=.8,type="sine",vol=.22){
+  const ac=ctx(), now=ac.currentTime;
+  const osc=ac.createOscillator(), gain=ac.createGain(), filter=ac.createBiquadFilter();
+  osc.type=type;
+  osc.frequency.setValueAtTime(freq,now);
+  osc.frequency.exponentialRampToValueAtTime(Math.max(22,freq*.58),now+dur*.75);
+  filter.type="lowpass"; filter.frequency.setValueAtTime(140,now);
+  gain.gain.setValueAtTime(.0001,now);
+  gain.gain.exponentialRampToValueAtTime(vol,now+.055);
+  gain.gain.exponentialRampToValueAtTime(.0001,now+dur);
+  osc.connect(filter); filter.connect(gain); gain.connect(ac.destination);
+  osc.start(now); osc.stop(now+dur+.02);
+}
+function hum(freq=36,dur=2.6,vol=.035){
+  const ac=ctx(), now=ac.currentTime;
+  const osc=ac.createOscillator(), gain=ac.createGain();
+  osc.type="triangle"; osc.frequency.setValueAtTime(freq,now);
+  gain.gain.setValueAtTime(.0001,now);
+  gain.gain.exponentialRampToValueAtTime(vol,now+.28);
+  gain.gain.exponentialRampToValueAtTime(.0001,now+dur);
+  osc.connect(gain); gain.connect(ac.destination);
+  osc.start(now); osc.stop(now+dur+.03);
+}
+function cls(el,name,ms){el.classList.add(name);setTimeout(()=>el.classList.remove(name),ms)}
+function color(name,ms=2300){cls(world,name,ms)}
+const effects=[
+  ()=>{},
+  ()=>color("rose"),
+  ()=>color("peach"),
+  ()=>color("brown"),
+  ()=>color("pale"),
+  ()=>cls(world,"pulse",2300),
+  ()=>cls(button,"hot",1900),
+  ()=>cls(button,"dark",1700),
+  ()=>hum(33,2.8,.032),
+  ()=>hum(42,1.8,.026),
+  ()=>{tone(48,.9,"sine",.18); setTimeout(()=>hum(31,1.6,.022),450)},
+  ()=>vibrate(55),
+  ()=>vibrate([80,80,100]),
+  ()=>vibrate([40,70,40,120,80]),
+  ()=>setTimeout(()=>hum(37,3.8,.028),900),
+  ()=>setTimeout(()=>vibrate([65,100,120]),800),
+  ()=>{color("rose",3000); cls(button,"hot",2600); hum(35,2.8,.025)}
+];
+function activate(e){
+  if(e){e.preventDefault();e.stopPropagation()}
+  const now=Date.now();
+  if(locked || now-lastFire<500) return;
+  lastFire=now; locked=true;
+  button.classList.add("pressing");
+  tone(50,.78,"sine",.24);
+  vibrate(30);
+  const effect=effects[Math.floor(Math.random()*effects.length)];
+  setTimeout(effect,420+Math.random()*760);
+  setTimeout(()=>button.classList.remove("pressing"),1300);
+  setTimeout(()=>locked=false,3000);
+}
+button.addEventListener("pointerdown",activate,{passive:false});
+button.addEventListener("touchstart",activate,{passive:false});
+button.addEventListener("mousedown",activate,{passive:false});
+</script>
+</body>
+</html>
